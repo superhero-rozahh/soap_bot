@@ -16,6 +16,10 @@ cursor = conn.cursor()
 # In-memory user session state
 user_state = {}
 
+@app.route("/", methods=["GET"])
+def health():
+    return "✅ App is running!"
+
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp():
     from_number = request.form.get("From")
@@ -138,3 +142,4 @@ def whatsapp():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
