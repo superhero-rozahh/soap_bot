@@ -33,6 +33,7 @@ def whatsapp():
     resp = MessagingResponse()
     msg = resp.message()
 
+    # Reset command
     if user_msg.lower() in ("привет", "меню", "здравствуйте"):
         state = {"step": "меню"}
         msg.body(
@@ -106,14 +107,16 @@ def whatsapp():
         price = state["price"]
         address = state["address"]
 
+        # Insert into DB and return the order ID
         cursor.execute(
-            "INSERT INTO orders (name, quantity, price, address, phone) VALUES (%s, %s, %s, %s, %s)",
+            "INSERT INTO orders (name, quantity, price, address, phone) VALUES (%s, %s, %s, %s, %s) RETURNING id",
             (name, quantity, price, address, phone)
         )
+        order_id = cursor.fetchone()[0]
         conn.commit()
 
         msg.body(
-            f"✅ Всё готово! Заказ принят:\n\n"
+            f"✅ Всё готово! Ваш заказ №{order_id} принят:\n\n"
             f"Имя: {name}\n"
             f"Количество: {quantity}\n"
             f"Сумма: {price}₸\n"
@@ -126,11 +129,11 @@ def whatsapp():
         user_state.pop(from_number)
         return str(resp)
 
+    # Fallback if input unrecognized
     msg.body("😕 Я вас не понял. Напишите 'меню' чтобы начать сначала.")
     return str(resp)
 
-# ✅ START SERVER (Only once)
+# ✅ Start server
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
