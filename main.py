@@ -20,28 +20,19 @@ user_state = {}
 def health():
     return "✅ App is running!"
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True)
-
-
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp():
     from_number = request.form.get("From")
     user_msg = request.form.get("Body").strip()
 
-    import datetime
     print(f"[{datetime.datetime.now()}] From: {from_number}, Msg: {user_msg}")
 
     state = user_state.get(from_number, {"step": "меню"})
     print(f"[{datetime.datetime.now()}] State Step: {state.get('step')}")
 
-    
     resp = MessagingResponse()
     msg = resp.message()
 
-    state = user_state.get(from_number, {"step": "меню"})
-
-    # Reset command
     if user_msg.lower() in ("привет", "меню", "здравствуйте"):
         state = {"step": "меню"}
         msg.body(
@@ -55,7 +46,6 @@ def whatsapp():
         user_state[from_number] = state
         return str(resp)
 
-    # Меню
     if state["step"] == "меню":
         if user_msg == "1":
             state["step"] = "ask_quantity"
@@ -74,7 +64,6 @@ def whatsapp():
         user_state[from_number] = state
         return str(resp)
 
-    # Шаг 1: Количество
     if state["step"] == "ask_quantity":
         if user_msg.isdigit():
             quantity = int(user_msg)
@@ -90,7 +79,6 @@ def whatsapp():
         user_state[from_number] = state
         return str(resp)
 
-    # Шаг 2: Имя
     if state["step"] == "ask_name":
         name = user_msg.strip().title()
         state.update({
@@ -101,7 +89,6 @@ def whatsapp():
         user_state[from_number] = state
         return str(resp)
 
-    # Шаг 3: Адрес
     if state["step"] == "ask_address":
         address = user_msg.strip()
         state.update({
@@ -112,7 +99,6 @@ def whatsapp():
         user_state[from_number] = state
         return str(resp)
 
-    # Шаг 4: Телефон и финал
     if state["step"] == "ask_phone":
         phone = user_msg.strip()
         name = state["name"]
@@ -120,7 +106,6 @@ def whatsapp():
         price = state["price"]
         address = state["address"]
 
-        # Сохраняем в базу данных
         cursor.execute(
             "INSERT INTO orders (name, quantity, price, address, phone) VALUES (%s, %s, %s, %s, %s)",
             (name, quantity, price, address, phone)
@@ -140,12 +125,10 @@ def whatsapp():
         user_state.pop(from_number)
         return str(resp)
 
-    # Ошибка/незнакомый ввод
     msg.body("😕 Я вас не понял. Напишите 'меню' чтобы начать сначала.")
     return str(resp)
 
+# ✅ START SERVER (Only once)
 if __name__ == "__main__":
-    app.run(debug=True)
-
-
-
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
