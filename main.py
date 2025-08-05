@@ -101,8 +101,8 @@ def whatsapp():
         )
 
                         
-        else:
-            msg.body("❗ Введите 1 чтобы заказать или 2 чтобы узнать подробнее.")
+    else:
+        msg.body("❗ Введите 1 чтобы заказать или 2 чтобы узнать подробнее.")
         user_state[from_number] = state
         return str(resp)
 
@@ -178,4 +178,5 @@ def whatsapp():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
