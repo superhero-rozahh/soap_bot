@@ -13,7 +13,7 @@ TELEGRAM_TOKEN = os.getenv("7994489672:AAG14vFG_c4eeBGH-fC1OEb9OG9Wsc6Fd9w")
 TELEGRAM_CHAT_ID = os.getenv("521857122")
 
 def notify_telegram(text):
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKE}/sendMessage"
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {
         "chat_id": TELEGRAM_CHAT_ID,
         "text": text,
@@ -174,5 +174,6 @@ def whatsapp():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
