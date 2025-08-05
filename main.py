@@ -8,6 +8,21 @@ import datetime
 load_dotenv()
 app = Flask(__name__)
 
+TELEGRAM_TOKEN = os.getenv("7994489672:AAG14vFG_c4eeBGH-fC1OEb9OG9Wsc6Fd9w")
+TELEGRAM_CHAT_ID = os.getenv("521857122")
+
+def notify_telegram(text):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKE}/sendMessage"
+    payload = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": text,
+        "parse_mode": "HTML"
+    }
+    try:
+        requests.post(url, data=payload)
+    except Exception as e:
+        print(f"❌ Ошибка отправки в Telegram: {e}")
+
 # Подключение к базе данных
 try:
     conn = psycopg2.connect(os.getenv("DATABASE_URL"))
@@ -125,6 +140,17 @@ def whatsapp():
             print(f"❌ Ошибка записи в БД: {e}")
             msg.body("❗ Ошибка при сохранении заказа. Попробуйте позже.")
             return str(resp)
+            
+
+        notify_telegram(
+            f"📦 <b>Новый заказ #{order_id}</b>\n\n"
+            f"<b>Имя:</b> {name}\n"
+            f"<b>Кол-во:</b> {quantity} шт\n"
+            f"<b>Сумма:</b> {price}₸\n"
+            f"<b>Адрес:</b> {address}\n"
+            f"<b>Тел:</b> {phone}"
+        )
+
 
         msg.body(
             f"✅ Ваш заказ №{order_id} принят!\n\n"
@@ -147,3 +173,4 @@ def whatsapp():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
